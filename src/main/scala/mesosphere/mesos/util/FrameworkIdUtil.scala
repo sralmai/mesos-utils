@@ -4,10 +4,10 @@ import org.apache.mesos.state.State
 import mesosphere.util.BackToTheFuture
 import org.apache.mesos.Protos.{FrameworkInfo => FrameworkInfoProto, FrameworkID => FrameworkIDProto}
 import com.google.protobuf.InvalidProtocolBufferException
-import java.util.logging.{Level, Logger}
 import scala.util.{Failure, Success}
 import scala.concurrent.{Future, Await, ExecutionContext}
 import scala.concurrent.duration.Duration
+import org.slf4j.LoggerFactory
 
 /**
  * Utility class for keeping track of a framework ID in Mesos state.
@@ -19,7 +19,7 @@ import scala.concurrent.duration.Duration
 class FrameworkIdUtil(val state: State, val key: String = "frameworkId") {
 
   val defaultWait = Duration(2, "seconds")
-  private val log = Logger.getLogger(getClass.getName)
+  private val log = LoggerFactory.getLogger(getClass.getName)
 
   import BackToTheFuture.FutureToFutureOption
   import ExecutionContext.Implicits.global
@@ -32,7 +32,7 @@ class FrameworkIdUtil(val state: State, val key: String = "frameworkId") {
           Some(frameworkId)
         } catch {
           case e: InvalidProtocolBufferException => {
-            log.warning("Failed to parse framework ID")
+            log.warn("Failed to parse framework ID")
             None
           }
         }
@@ -51,11 +51,11 @@ class FrameworkIdUtil(val state: State, val key: String = "frameworkId") {
             log.info("Stored framework ID '%s'".format(frameworkId.getValue))
           }
           case Failure(t) => {
-            log.log(Level.WARNING, "Failed to store framework ID", t)
+            log.warn("Failed to store framework ID", t)
           }
         }
       }
-      case _ => log.warning("Fetch framework ID returned nothing")
+      case _ => log.warn("Fetch framework ID returned nothing")
     }
   }
 
